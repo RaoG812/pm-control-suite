@@ -2,11 +2,15 @@
 
 Early documentation and starter UI for the Onboarding Insights Neural Toolset. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full architecture, data model, and execution plan.
 
+## Toolset / Mission Control
+
+The Toolset dashboard (aka Mission Control) exposes project health metrics once the **Apply OINT** job has completed. The job can be triggered from the home page, the roster page, or directly from `/toolset`. Until the job succeeds, Mission Control stays in an idle state. A mock server job flips to `success` after about three seconds.
+
 ## Getting Started
 
 ```bash
-npm install
-npm run dev
+pnpm i
+pnpm dev
 ```
 
 The home page now links to key interfaces:
@@ -15,7 +19,7 @@ The home page now links to key interfaces:
 - **View Matrix** &mdash; integration matrix prototype at `/matrix`
 - **3D Map** &mdash; commit map at `/3d-map`
 
-`npm test` runs a TypeScript type check.
+`pnpm test` runs a TypeScript type check.
 
 *Binary assets such as `.ico` files are intentionally excluded.*
 

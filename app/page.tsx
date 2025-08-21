@@ -1,47 +1,29 @@
-// @ts-nocheck
+'use client'
 import Link from 'next/link'
-import HexBackground from '../components/HexBackground'
+import { useEffect, useState } from 'react'
+import ApplyOintButton from '../components/ApplyOintButton'
+import { getStatus } from '../lib/ointClient'
+import { Badge } from '../lib/ui'
 
 export default function Home() {
+  const [state, setState] = useState<'idle' | 'running' | 'success' | 'failed'>('idle')
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const cached = window.localStorage.getItem('OINT_STATE') as any
+      if (cached) setState(cached)
+    }
+    getStatus().then(s => setState(s.state))
+  }, [])
   return (
-    <main className="relative min-h-screen overflow-hidden">
-      <HexBackground />
-      <div
-        className="fixed inset-0 -z-10"
-        style={{
-          background:
-            'radial-gradient(at 25% 25%, rgba(30,58,138,0.4), transparent 60%), radial-gradient(at 75% 25%, rgba(46,16,101,0.4), transparent 60%), radial-gradient(at 50% 75%, rgba(255,255,255,0.2), transparent 70%)',
-          backgroundColor: '#000',
-          backgroundSize: '400% 400%',
-          animation: 'bgMove 30s ease infinite'
-        }}
-      />
-      <div className="relative z-10 p-6 max-w-3xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">OINTment</h1>
-          <p className="text-sm text-zinc-400">Onboarding Insights Neural Toolset</p>
-        </div>
-        <div className="flex gap-4">
-          <Link
-            href="/ingest"
-            className="px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition"
-          >
-            Upload ZIP
-          </Link>
-          <Link
-            href="/matrix"
-            className="px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition"
-          >
-            View Matrix
-          </Link>
-        </div>
-        <div className="pt-8 text-sm text-zinc-400 max-w-prose">
-          <p>
-            <span className="font-semibold">OINT</span> stands for
-            <em> Onboarding Insights Neural Toolset</em>. OINTment smooths project onboarding by exposing integrations,
-            risks and recommended next steps.
-          </p>
-        </div>
+    <main className="p-6 space-y-6">
+      <h1 className="text-2xl font-semibold">Welcome to OINT</h1>
+      <p className="text-zinc-400">Onboarding helper for new projects.</p>
+      <div className="flex items-center gap-4">
+        <ApplyOintButton />
+        <Link href="/toolset" className="text-blue-400 underline">
+          Go to Toolset
+        </Link>
+        {state === 'success' && <Badge variant="success">OINT ready</Badge>}
       </div>
     </main>
   )
