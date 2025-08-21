@@ -26,6 +26,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Link href="/matrix" className="hover:text-emerald-400">
               Matrix
             </Link>
+            <Link href="/roaster" className="hover:text-emerald-400">
+              Roaster
+            </Link>
             <Link href="/tracking" className="hover:text-emerald-400">
               Tracking
             </Link>

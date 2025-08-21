@@ -45,20 +45,93 @@ async function chat(messages: any[], response_format: any) {
   throw new Error(`LLM analysis failed: ${detail}`)
 }
 
-export async function summarizeRepo(fileList: string[]): Promise<RepoAnalysis> {
-  // Large repositories can exceed token limits; only send the first 200 entries
-  const content = fileList.slice(0, 200).join('\n')
-  const messages: any = [
+export async function summarizeRepo(
+  files: { path: string; content: string }[],
+  level = 0
+): Promise<RepoAnalysis> {
+  const tones = [
+    'Provide a gentle, high-level review highlighting strengths and mild suggestions for improvement across backend, frontend, database and other areas.',
+    'Deliver a direct and balanced code audit noting weaknesses, missing pieces and potential risks for backend, frontend, database and other components.',
+    'Produce an unforgiving, highly critical audit that focuses on vulnerabilities, missing tests and documentation, and any red flags in backend, frontend, database and other parts. No praise, only issues.'
+  ]
+  const sys = tones[level] || tones[0]
+
+  const overallContent = files
+    .slice(0, 20)
+    .map(f => `FILE: ${f.path}\n${f.content}`)
+    .join('\n\n')
+  const overall = await chat(
+    [
+      {
+        role: 'system',
+        content:
+          `${sys} Respond with JSON of shape {"overview":string,"metrics":{"complexity":number,"documentation":number,"tests":number}}. Values are 0-100. No extra text.`
+      },
+      { role: 'user', content: overallContent }
+    ],
+    { type: 'json_object' }
+  )
+  const parsed = JSON.parse(overall)
+
+  function domain(path: string) {
+    if (/db|sql|prisma|schema/i.test(path)) return 'DB'
+    if (/frontend|components|\.tsx|\.jsx/i.test(path)) return 'Frontend'
+    if (/api|server|backend|\.ts$|\.js$/.test(path) && !/\.tsx|\.jsx/.test(path)) return 'Backend'
+    return 'Other'
+  }
+
+  const domains = ['Backend', 'Frontend', 'DB', 'Other']
+  const takeaways: string[] = []
+  for (const d of domains) {
+    const subset = files.filter(f => domain(f.path) === d).slice(0, 5)
+    const prompt = subset.length
+      ? subset.map(f => `FILE: ${f.path}\n${f.content}`).join('\n\n')
+      : 'No relevant files.'
+    const txt = await chat(
+      [
+        {
+          role: 'system',
+          content: `Identify critical problems and missing pieces in the ${d} code.`
+        },
+        { role: 'user', content: prompt }
+      ],
+      { type: 'text' }
+    )
+    takeaways.push(txt.trim())
+  }
+
+  return { overview: parsed.overview || '', metrics: parsed.metrics || { complexity: 0, documentation: 0, tests: 0 }, takeaways }
+}
+
+export async function explainPackage(pkg: string): Promise<string> {
+  const res = await client.chat.completions.create({
+    model: 'gpt-4.1-nano',
+    messages: [
+      {
+        role: 'system',
+        content:
+          'In one concise sentence, explain what this npm package provides and how it typically integrates into a JS/TS project.'
+      },
+      { role: 'user', content: pkg }
+    ]
+  } as any)
+  return res.choices[0]?.message?.content?.trim() || ''
+}
+
+export async function suggestFixes(analysis: RepoAnalysis): Promise<string> {
+  const messages = [
     {
       role: 'system',
       content:
-        'Summarize the repository file list. Respond with JSON of shape {"overview":string,"takeaways":string[],"metrics":{"complexity":number,"documentation":number,"tests":number}}. Values are 0-100. No extra text.'
+        'Given repository health metrics and critique, propose one concise fix or improvement action for maintainers. Plain text only.'
     },
-    { role: 'user', content }
+    { role: 'user', content: JSON.stringify(analysis) }
   ]
-
-  const txt = await chat(messages, { type: 'json_object' })
-  return JSON.parse(txt)
+  const res = await client.chat.completions.create({
+    model: 'gpt-4.1-nano',
+    messages
+  } as any)
+  return res.choices[0]?.message?.content?.trim() || ''
 }
 
 // Categorize commit messages into domain (frontend/backend/db/other) and
