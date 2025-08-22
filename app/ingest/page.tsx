@@ -58,6 +58,7 @@ export default function IngestPage() {
   const [repo, setRepo] = useState('')
   const [branches, setBranches] = useState<string[]>([])
   const [branch, setBranch] = useState('')
+  const [file, setFile] = useState<File | null>(null)
   const [error, setError] = useState('')
   const [docs, setDocs] = useState<File[]>(getDocsState())
   const [hasVuln, setHasVuln] = useState(false)
@@ -109,35 +110,6 @@ export default function IngestPage() {
     if (branch) localStorage.setItem('branch', branch)
   }, [branch])
 
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    const file = (e.currentTarget.elements.namedItem('file') as HTMLInputElement).files?.[0]
-    if (!file) return
-    const form = new FormData()
-    form.append('file', file)
-    setShowConsole(true)
-    setLoading(true)
-    try {
-      const res = await fetch('/api/ingest', { method: 'POST', body: form })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'analysis failed')
-      setResult(data)
-      localStorage.setItem('ingestResult', JSON.stringify(data))
-      if (repo) localStorage.setItem('repo', repo)
-      if (branch) localStorage.setItem('branch', branch)
-      if (repo) prefetchTracking(repo)
-
-      setError('')
-    } catch (err) {
-      console.error(err)
-      setResult(null)
-      localStorage.removeItem('ingestResult')
-      setError(err instanceof Error ? err.message : String(err))
-    } finally {
-      setLoading(false)
-    }
-  }
-
   async function loadBranches() {
     if (!repo) return
     const res = await fetch(`/api/github/branches?repo=${repo}`)
@@ -149,11 +121,15 @@ export default function IngestPage() {
     }
   }
 
-  async function analyzeRepo() {
-    if (!repo || !branch) return
+  async function analyze() {
+    if (!file && (!repo || !branch)) return
     const form = new FormData()
-    form.append('repo', repo)
-    form.append('branch', branch)
+    if (file) {
+      form.append('file', file)
+    } else {
+      form.append('repo', repo)
+      form.append('branch', branch)
+    }
     setShowConsole(true)
     setLoading(true)
     try {
@@ -162,8 +138,11 @@ export default function IngestPage() {
       if (!res.ok) throw new Error(data.error || 'analysis failed')
       setResult(data)
       localStorage.setItem('ingestResult', JSON.stringify(data))
-      if (repo) prefetchTracking(repo)
-
+      if (repo && !file) {
+        localStorage.setItem('repo', repo)
+        localStorage.setItem('branch', branch)
+        prefetchTracking(repo)
+      }
       setError('')
     } catch (err) {
       console.error(err)
@@ -180,6 +159,18 @@ export default function IngestPage() {
     setDocs(files)
     setDocsState(files)
   }
+
+  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0] || null
+    if (f) {
+      setRepo('')
+      setBranch('')
+      setBranches([])
+    }
+    setFile(f)
+  }
+
+  const canAnalyze = !!file || (repo && branch)
 
 
   return (
@@ -218,14 +209,19 @@ export default function IngestPage() {
               <div className="flex gap-2">
                 <input
                   value={repo}
-                  onChange={e => setRepo(e.target.value)}
+                  onChange={e => {
+                    setRepo(e.target.value)
+                    if (file) setFile(null)
+                  }}
                   placeholder="owner/repo"
-                  className="flex-1 px-3 py-2 rounded bg-zinc-900 border border-zinc-800 text-sm"
+                  disabled={!!file}
+                  className="flex-1 px-3 py-2 rounded bg-zinc-900 border border-zinc-800 text-sm disabled:opacity-50"
                 />
                 <button
                   type="button"
                   onClick={loadBranches}
-                  className="px-3 py-2 bg-zinc-800 rounded text-xs"
+                  disabled={!repo || !!file}
+                  className="px-3 py-2 bg-zinc-800 rounded text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Load
                 </button>
@@ -234,7 +230,8 @@ export default function IngestPage() {
                 <select
                   value={branch}
                   onChange={e => setBranch(e.target.value)}
-                  className="w-full px-3 py-2 rounded bg-zinc-900 border border-zinc-800 text-sm"
+                  disabled={!!file}
+                  className="w-full px-3 py-2 rounded bg-zinc-900 border border-zinc-800 text-sm disabled:opacity-50"
                 >
                   <option value="">select branch</option>
                   {branches.map(b => (
@@ -242,31 +239,25 @@ export default function IngestPage() {
                   ))}
                 </select>
               )}
-              <button
-                type="button"
-                onClick={analyzeRepo}
-                className="px-4 py-2 bg-emerald-600 text-sm font-medium rounded-lg hover:bg-emerald-500 transition"
-              >
-                Analyze Repo
-              </button>
             </section>
             <section className="space-y-4">
               <h2 className="text-lg font-medium">Manual ZIP Upload</h2>
-              <form onSubmit={onSubmit} className="space-y-4">
-                <input
-                  type="file"
-                  name="file"
-                  accept=".zip"
-                  className="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700"
-                />
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-emerald-600 text-sm font-medium rounded-lg hover:bg-emerald-500 transition"
-                >
-                  Upload and Analyze
-                </button>
-              </form>
+              <input
+                type="file"
+                accept=".zip"
+                onChange={onFileChange}
+                disabled={!!repo || !!branch}
+                className="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700 disabled:opacity-50"
+              />
             </section>
+            <button
+              type="button"
+              onClick={analyze}
+              disabled={!canAnalyze || loading}
+              className="px-4 py-2 bg-emerald-600 text-sm font-medium rounded-lg hover:bg-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Upload and Analyze
+            </button>
           </div>
           <div className="flex-none w-[560px] ml-auto mr-4">
             <OintCreationFlow docs={docs.length} repo={!!result} roast={hasVuln} />
