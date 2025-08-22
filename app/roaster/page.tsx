@@ -5,6 +5,7 @@ import Link from 'next/link'
 import HexBackground from '../../components/HexBackground'
 import { getRoasterState, setRoasterState } from '../../lib/roasterState'
 import { getOintData } from '../../lib/toolsetState'
+import { getDocs } from '../../lib/docsState'
 
 type Result = { files: string[] }
 type Comment = { department: string; comment: string; temperature: number }
@@ -298,10 +299,13 @@ export default function RoasterPage() {
     setHealed(false)
     setRoasting(true)
     try {
+      const docs = await Promise.all(
+        getDocs().map(async d => ({ name: d.name, content: await d.text() }))
+      )
       const res = await fetch('/api/roaster', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ files: result.files, level })
+        body: JSON.stringify({ files: result.files, docs, level })
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'roaster failed')
@@ -392,7 +396,7 @@ export default function RoasterPage() {
         <div className="flex items-start justify-between">
           <h1 className="text-2xl font-semibold tracking-tight">Roaster</h1>
           <div className="text-right leading-tight">
-            <div className="text-5xl font-bold">Roaster v0.1.6</div>
+            <div className="text-5xl font-bold">Roaster v0.1.7</div>
             <div className="text-sm text-zinc-400">AI-powered code critique, assisting in project management</div>
           </div>
         </div>
