@@ -398,7 +398,7 @@ export default function RoasterPage() {
         <div className="flex items-start justify-between">
           <h1 className="text-2xl font-semibold tracking-tight">Roaster</h1>
           <div className="text-right leading-tight">
-            <div className="text-5xl font-bold">Roaster v0.1.8</div>
+            <div className="text-5xl font-bold">Roaster v0.1.9</div>
             <div className="text-sm text-zinc-400">AI-powered code critique, assisting in project management</div>
           </div>
         </div>
@@ -419,15 +419,20 @@ export default function RoasterPage() {
               >
                 Roast!
               </button>
-              <button
-                onClick={applyOint}
-                disabled={!ointCreated || !roast}
-                className={`px-4 py-2 bg-blue-600 text-sm font-medium rounded-lg transition ${
-                  ointCreated && roast ? 'hover:bg-blue-500' : 'opacity-50 cursor-not-allowed'
-                }`}
-              >
-                Apply OINT
-              </button>
+              <div className="flex flex-col items-start">
+                <button
+                  onClick={applyOint}
+                  disabled={!ointCreated || !roast}
+                  className={`px-4 py-2 bg-emerald-600 text-sm font-medium rounded-lg transition ${
+                    ointCreated && roast ? 'hover:bg-emerald-500' : 'opacity-50 cursor-not-allowed'
+                  }`}
+                >
+                  Apply OINT
+                </button>
+                <Link href="/toolset" className="text-xs text-zinc-400 underline mt-1">
+                  Create OINT
+                </Link>
+              </div>
             </div>
           </div>
           <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 flex items-center gap-4">
@@ -457,16 +462,18 @@ export default function RoasterPage() {
                   <span className="text-sm font-semibold capitalize">{d}</span>
                   <span className="text-xs text-zinc-400">{Math.round(w.temperature * 100)}%</span>
                 </div>
-                <div
-                  className={`text-sm ${w.temperature > 0.66 ? 'text-rose-400' : w.temperature > 0.33 ? 'text-amber-300' : 'text-emerald-400'}`}
+                <ul
+                  className={`text-sm list-disc list-inside ${w.temperature > 0.66 ? 'text-rose-400' : w.temperature > 0.33 ? 'text-amber-300' : 'text-emerald-400'}`}
                 >
-                  {w.comment}
-                </div>
-                <div className="h-1 bg-zinc-800 rounded-full mt-2">
-                  <div
-                    className={`h-full rounded-full ${w.temperature > 0.66 ? 'bg-rose-500' : w.temperature > 0.33 ? 'bg-amber-400' : 'bg-emerald-500'}`}
-                    style={{ width: `${w.temperature * 100}%` }}
-                  />
+                  {w.comment.split('\n').map((c, i) => (
+                    <li key={i}>{c}</li>
+                  ))}
+                </ul>
+              <div className="h-1 bg-zinc-800 rounded-full mt-2">
+                <div
+                  className={`h-full rounded-full ${w.temperature > 0.66 ? 'bg-rose-500' : w.temperature > 0.33 ? 'bg-amber-400' : 'bg-emerald-500'}`}
+                  style={{ width: `${w.temperature * 100}%` }}
+                />
                 </div>
               </div>
             )
@@ -490,11 +497,13 @@ export default function RoasterPage() {
                     <span className="text-sm font-semibold capitalize">{d}</span>
                     <span className="text-xs text-zinc-400">{Math.round(w.temperature * 100)}%</span>
                   </div>
-                  <div
-                    className={`text-sm ${w.temperature > 0.66 ? 'text-rose-400' : w.temperature > 0.33 ? 'text-amber-300' : 'text-emerald-400'}`}
+                  <ul
+                    className={`text-sm list-disc list-inside ${w.temperature > 0.66 ? 'text-rose-400' : w.temperature > 0.33 ? 'text-amber-300' : 'text-emerald-400'}`}
                   >
-                    {w.comment}
-                  </div>
+                    {w.comment.split('\n').map((c, i) => (
+                      <li key={i}>{c}</li>
+                    ))}
+                  </ul>
                   <div className="h-1 bg-zinc-800 rounded-full mt-2">
                     <div
                       className={`h-full rounded-full ${w.temperature > 0.66 ? 'bg-rose-500' : w.temperature > 0.33 ? 'bg-amber-400' : 'bg-emerald-500'}`}

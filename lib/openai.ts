@@ -107,7 +107,7 @@ export async function roastRepo(
     {
       role: 'system',
       content:
-        `Provide a concise code review from multiple departments (frontend, backend, ops) at criticism level ${level} (0=gently, 1=brutal). Consider supporting documents like PRDs or estimates and highlight any deviations from documented requirements or timelines. Respond with JSON {"reviews":[{"department":string,"comment":string,"temperature":number}]}. Temperature is between 0 and 1 indicating criticism level.`
+        `Provide a concise code review for each department (frontend, backend, ops) using criticism level ${level} (0=gently, 1=brutal). Criticism level affects tone only\u2014always report all real issues found and never invent problems. Base all feedback strictly on the provided files and documents. Respond with JSON {"reviews":[{"department":string,"comment":string,"temperature":number}]}. The comment must be a bullet list (use "- " for each item) targeted to that department. If no issues exist, include "- No significant issues found". Temperature is between 0 and 1 indicating criticism level.`
     },
     { role: 'user', content }
   ]
