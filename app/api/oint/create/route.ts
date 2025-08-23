@@ -5,10 +5,19 @@ export async function POST(req: Request) {
   const form = await req.formData()
   const docs = form.getAll('docs') as File[]
   const filesField = form.get('files')?.toString() || '[]'
+  const codeField = form.get('code')?.toString() || '[]'
   let repoFiles: string[] = []
+  let repoCode: { path: string; content: string }[] = []
   try {
     const parsed = JSON.parse(filesField)
     if (Array.isArray(parsed)) repoFiles = parsed
+  } catch {}
+  try {
+    const parsed = JSON.parse(codeField)
+    if (Array.isArray(parsed))
+      repoCode = parsed
+        .filter((f: any) => f && typeof f.path === 'string')
+        .map((f: any) => ({ path: f.path, content: String(f.content || '') }))
   } catch {}
   const hasVuln = form.get('hasVuln') === 'true'
 
@@ -28,7 +37,7 @@ export async function POST(req: Request) {
     /fin|budget|cost|expense/i.test(d.name + d.text)
   )
 
-  markCreated(parsedDocs, repoFiles, hasVuln, hasFinance)
+  markCreated(parsedDocs, repoFiles, repoCode, hasVuln, hasFinance)
 
   return NextResponse.json({ status: 'created' })
 }

@@ -361,6 +361,11 @@ export default function RoasterPage() {
   const health = temps.length
     ? 100 - Math.round((temps.reduce((s, t) => s + t, 0) / temps.length) * 100)
     : 0
+  const healthReason =
+    health === 0 && temps.length
+      ? `Health is 0 due to extreme ${Object.entries(widgets)
+          .sort((a, b) => b[1].temperature - a[1].temperature)[0][0]} critique`
+      : undefined
 
   const hue = 120 - level * 120
   const gradientStyle: CSSProperties = healed
@@ -394,7 +399,7 @@ export default function RoasterPage() {
       >
         <Face level={level} />
       </div>
-      <div className="relative z-30 space-y-8">
+      <div className="relative z-30 space-y-8 fade-in-fast">
         <div className="flex items-start justify-between">
           <h1 className="text-2xl font-semibold tracking-tight">Roaster</h1>
           <div className="text-right leading-tight">
@@ -430,7 +435,7 @@ export default function RoasterPage() {
               </Link>
             </div>
           </div>
-          <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 flex items-center gap-4">
+          <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 flex items-center gap-4" title={healthReason}>
             <div className="relative h-20 w-20">
               <div className="absolute inset-0 rounded-full bg-zinc-800" />
               <div

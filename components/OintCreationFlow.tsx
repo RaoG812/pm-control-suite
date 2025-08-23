@@ -208,8 +208,6 @@ export function OintCreationFlow({
       <style jsx>{`
         @keyframes fadeLarge { from { opacity: 0; } to { opacity: 1; } }
         .animate-fade-large { animation: fadeLarge 0.7s ease; }
-        @keyframes slow-spin { to { transform: rotate(360deg); } }
-        .animate-slow-spin { animation: slow-spin 4s linear infinite; }
       `}</style>
     </div>
   )

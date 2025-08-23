@@ -1,12 +1,13 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import type { ReactNode } from 'react'
 
-const links = [
+const links: { href: string; label: ReactNode; extra?: string; brand?: boolean }[] = [
   {
     href: '/',
     label: 'OINTment',
-    extra: 'font-semibold tracking-tight text-[#00FF85] hover:text-[#00FF85]',
+    extra: 'text-lg font-semibold tracking-tight group',
     brand: true
   },
   { href: '/ingest', label: 'Ingest' },
@@ -20,13 +21,17 @@ const links = [
 export default function TopNav() {
   const pathname = usePathname()
   return (
-    <nav className="mx-auto max-w-7xl flex items-center gap-6 px-6 py-4 text-sm overflow-x-auto whitespace-nowrap">
+    <nav className="mx-auto max-w-7xl flex items-center gap-6 px-6 py-4 text-sm overflow-x-auto whitespace-nowrap fade-in-fast">
       {links.map(l => {
         const active = pathname === l.href
         if (l.brand) {
           return (
-            <Link key={l.href} href={l.href} className={l.extra ?? ''}>
-              {l.label}
+            <Link
+              key={l.href}
+              href={l.href}
+              className={`${l.extra ?? ''} text-emerald-400`}
+            >
+              OINTment
             </Link>
           )
         }

@@ -1,7 +1,12 @@
 import type { HTMLAttributes } from 'react'
 
 export function Card({ className = '', ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={`rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 ${className}`} {...props} />
+  return (
+    <div
+      className={`rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 fade-in-fast ${className}`}
+      {...props}
+    />
+  )
 }
 
 export function Badge({ className = '', ...props }: HTMLAttributes<HTMLSpanElement>) {

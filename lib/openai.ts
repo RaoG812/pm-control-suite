@@ -125,6 +125,43 @@ export async function roastRepo(
   }
 }
 
+export async function applyOint(
+  roast: RoastComment[],
+  fileList: string[] = [],
+  docs: { name: string; text: string }[] = [],
+  code: { path: string; content: string }[] = []
+): Promise<{ comments: RoastComment[]; steps: string[] }> {
+  const roastPart = roast
+    .map(r => `${r.department.toUpperCase()}:\n${r.comment}`)
+    .join('\n---\n')
+  const filesPart = fileList.slice(0, 200).join('\n')
+  const docsPart = docs
+    .map(d => `DOC (${d.name}):\n${d.text}`)
+    .join('\n---\n')
+  const codePart = code
+    .slice(0, 20)
+    .map(f => `FILE (${f.path}):\n${f.content.slice(0, 2000)}`)
+    .join('\n---\n')
+  const content = `ROAST:\n${roastPart}\nFILES:\n${filesPart}\nDOCS:\n${docsPart}\nCODE:\n${codePart}`
+  const messages: any = [
+    {
+      role: 'system',
+      content:
+        'Using the roast findings plus repository file list, docs and code, draft refined recommendations for each department and up to 8 actionable steps. Respond with JSON {"comments":[{"department":string,"comment":string,"temperature":number}],"steps":string[]}. Only reference provided docs or files. No extra text.'
+    },
+    { role: 'user', content }
+  ]
+  const txt = await chat(messages, { type: 'json_object' }, 'gpt-5-chat')
+  try {
+    const parsed = JSON.parse(txt)
+    const comments = Array.isArray(parsed.comments) ? parsed.comments : []
+    const steps = Array.isArray(parsed.steps) ? parsed.steps : []
+    return { comments, steps }
+  } catch {
+    return { comments: [], steps: [] }
+  }
+}
+
 export async function suggestFixes(fileList: string[]): Promise<string[]> {
   const content = fileList.slice(0, 200).join('\n')
   const messages: any = [
