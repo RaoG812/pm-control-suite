@@ -399,7 +399,7 @@ export default function RoasterPage() {
       >
         <Face level={level} />
       </div>
-      <div className="relative z-30 space-y-8">
+      <div className="relative z-30 space-y-8 fade-in-fast">
         <div className="flex items-start justify-between">
           <h1 className="text-2xl font-semibold tracking-tight">Roaster</h1>
           <div className="text-right leading-tight">

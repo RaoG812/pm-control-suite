@@ -152,8 +152,8 @@ export function OintCreationFlow({
               {active && (
                 <svg
                   viewBox="0 0 140 140"
-                  className="absolute -inset-4 animate-slow-spin overflow-visible"
-                  style={{ filter: `drop-shadow(0 0 6px ${a.color})` }}
+                  className="absolute -inset-8 animate-slow-spin overflow-visible"
+                  style={{ filter: `drop-shadow(0 0 8px ${a.color})` }}
                 >
                   <circle
                     cx="70"
@@ -208,8 +208,6 @@ export function OintCreationFlow({
       <style jsx>{`
         @keyframes fadeLarge { from { opacity: 0; } to { opacity: 1; } }
         .animate-fade-large { animation: fadeLarge 0.7s ease; }
-        @keyframes slow-spin { to { transform: rotate(360deg); } }
-        .animate-slow-spin { animation: slow-spin 4s linear infinite; }
       `}</style>
     </div>
   )

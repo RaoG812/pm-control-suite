@@ -23,7 +23,7 @@ type Result = {
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800 shadow-xl p-4 backdrop-blur-sm">
+    <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800 shadow-xl p-4 backdrop-blur-sm fade-in-fast">
       {children}
     </div>
   )
@@ -35,28 +35,19 @@ function Gauge({ value }: { value: number }) {
   const offset = circumference - (value / 100) * circumference
   const color = value >= 80 ? '#10b981' : value >= 60 ? '#f59e0b' : '#ef4444'
   return (
-    <svg viewBox="0 0 52 26" className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
+    <svg viewBox="0 0 52 32" className="w-full h-auto overflow-visible">
+      <path d="M2 30 A 24 24 0 0 1 50 30" stroke="#27272a" strokeWidth={4} fill="none" />
       <path
-        d="M2 24 A 24 24 0 0 1 50 24"
-        stroke="#27272a"
-        strokeWidth={4}
-        fill="none"
-      />
-      <path
-        d="M2 24 A 24 24 0 0 1 50 24"
+        d="M2 30 A 24 24 0 0 1 50 30"
         stroke={color}
         strokeWidth={4}
         strokeDasharray={circumference}
         strokeDashoffset={offset}
         fill="none"
+        strokeLinecap="round"
+        style={{ filter: `drop-shadow(0 0 4px ${color})` }}
       />
-      <text
-        x="26"
-        y="22"
-        textAnchor="middle"
-        fontSize="8"
-        fill="#a1a1aa"
-      >
+      <text x="26" y="26" textAnchor="middle" fontSize="8" fill="#a1a1aa">
         {value}%
       </text>
     </svg>
@@ -276,8 +267,9 @@ export default function IngestPage() {
         />
         <div className="absolute inset-0 bg-black/60" />
       </div>
-      <div className="relative z-10 p-10 space-y-6">
+      <div className="relative z-10 p-10 space-y-6 fade-in-fast">
         <h1 className="text-2xl font-semibold tracking-tight">Ingest</h1>
+        <p className="text-sm text-zinc-400">Upload code and docs to prep the analyzers</p>
         <div className="flex flex-col md:flex-row md:gap-8">
           <div className="space-y-8 max-w-md">
             <DocsUploader docs={docs} setDocs={updateDocs} />
@@ -433,8 +425,10 @@ export default function IngestPage() {
               </Card>
               {(['complexity', 'documentation', 'tests'] as const).map(key => (
                 <Card key={key}>
-                  <div className="text-sm font-semibold mb-2 capitalize">{key}</div>
-                  <div className="max-w-[100px] mx-auto">
+                  <div className="text-sm font-semibold mb-2 capitalize text-center">
+                    {key}
+                  </div>
+                  <div className="w-full max-w-[150px] mx-auto">
                     <Gauge value={result.analysis.metrics[key]} />
                   </div>
                 </Card>

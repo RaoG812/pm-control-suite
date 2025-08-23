@@ -83,10 +83,10 @@ export default function HexBackground({ className = "", reveal = true }: { class
           content: '';
           position: absolute;
           inset: 0;
-          background: rgba(16,185,129,0.25);
+          background: rgba(16,185,129,0.4);
           transform: scaleY(0);
           transform-origin: bottom;
-          filter: drop-shadow(0 0 3px rgba(16,185,129,0.25));
+          filter: drop-shadow(0 0 4px rgba(16,185,129,0.6));
           animation: fillHex 6s forwards;
         }
         @keyframes fillHex {

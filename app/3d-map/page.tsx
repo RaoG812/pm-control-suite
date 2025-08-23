@@ -546,6 +546,7 @@ export default function MapPage() {
       />
       <div className="relative z-10 mx-auto max-w-5xl px-6 py-10 space-y-6">
         <h1 className="text-2xl font-semibold tracking-tight">3D Map</h1>
+        <p className="text-sm text-zinc-400">Visualize commit history across branches in 3D</p>
         <div className="flex flex-wrap gap-2">
           <input
             value={repo}
