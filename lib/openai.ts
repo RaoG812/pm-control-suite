@@ -38,13 +38,28 @@ async function chat(
 ) {
   if (!apiKey) throw new Error('LLM API key missing')
   const base = Array.isArray(models)
-    ? models
-    : models
-    ? [models]
-    : [process.env.LLM_MODEL || 'gpt-5-chat']
-  const modelList = [...base, 'gpt-4o'].filter(
-    (v, i, a) => a.indexOf(v) === i
-  )
+    ? models.flatMap(m =>
+        m && m.startsWith('gpt-5')
+          ? [
+              'gpt-5-2025-08-07',
+              'gpt-5-mini-2025-08-07',
+              'gpt-5-nano-2025-08-07',
+              'gpt-5-chat-latest'
+            ]
+          : [m]
+      )
+    : (() => {
+        const m = models || process.env.LLM_MODEL || 'gpt-5';
+        return m.startsWith('gpt-5')
+          ? [
+              'gpt-5-2025-08-07',
+              'gpt-5-mini-2025-08-07',
+              'gpt-5-nano-2025-08-07',
+              'gpt-5-chat-latest'
+            ]
+          : [m];
+      })()
+  const modelList = [...base, 'gpt-4o'].filter((v, i, a) => a.indexOf(v) === i)
   let lastErr: any
   for (let i = 0; i < modelList.length; i++) {
     const m = modelList[i]

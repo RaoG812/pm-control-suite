@@ -43,7 +43,10 @@ AIML_API_KEY=your_aiml_api_key          # or OPENAI_API_KEY
 AIML_API_BASE_URL=https://api.aimlapi.com/v1 # optional
 OPENAI_API_KEY=your_openai_key          # optional
 OPENAI_BASE_URL=https://api.openai.com/v1 # optional
-LLM_MODEL=gpt-5-chat                    # optional model override
+LLM_MODEL=gpt-5                          # optional model override
+                                        # tries gpt-5, then gpt-5-mini,
+                                        # gpt-5-nano, gpt-5-chat-latest,
+                                        # finally gpt-4o
 ```
 
 ### Scripts
